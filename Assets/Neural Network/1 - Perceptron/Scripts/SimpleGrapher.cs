@@ -17,7 +17,7 @@ public class SimpleGrapher : MonoBehaviour {
         int y = r;
         float d = 1 / 4.0f - r;
         float end = Mathf.Ceil(r / Mathf.Sqrt(2));
-
+        
         for (int x = 0; x <= end; x++) {
             tex.SetPixel(cx + x, cy + y, col);
             tex.SetPixel(cx + x, cy - y, col);

@@ -19,10 +19,6 @@ public class Perceptron : MonoBehaviour
     {
         DrawAllPoints();
         Train(epochs);
-        Debug.Log(CalcOutput(0));
-        Debug.Log(CalcOutput(1));
-        Debug.Log(CalcOutput(2));
-        Debug.Log(CalcOutput(3));
         graph.DrawRay((float) -(weights[0] / weights[1]), (float) -(bias / weights[1]), Color.white);
 
         double x = 0.5, y = 0.5;
@@ -66,16 +62,21 @@ public class Perceptron : MonoBehaviour
             for (int j = 0; j < trainingSet.Length; j++)
             {
                 UpdateWeights(j);
-                Debug.Log(j + ") " + weights[0] + " " + weights[1] + " " + bias);
+                //Debug.Log(j + ") " + weights[0] + " " + weights[1] + " " + bias);
             }
             Debug.Log("Total Error: " + totalError);
+            if (totalError == 0)
+            {
+                break;
+            }
         }
     }
     void UpdateWeights(int j)
     {
         double error = trainingSet[j].outputSet - CalcOutput(j);
-        totalError += error;
-        for(int i = 0; i < weights.Length; i++)
+        totalError += Mathf.Abs((float)error);
+
+        for (int i = 0; i < weights.Length; i++)
         {
             weights[i] += error * trainingSet[j].inputSet[i];
         }

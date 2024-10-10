@@ -53,9 +53,11 @@ public class DPerceptron : MonoBehaviour
         {
             player.SetTrigger("Crouch");
         }
-        TrainingSet dataPoint = new TrainingSet();
-        dataPoint.inputSet = new double[] { shape, color };
-        dataPoint.outputSet = output;
+        TrainingSet dataPoint = new()
+        {
+            inputSet = new double[] { shape, color },
+            outputSet = output
+        };
 
         trainingSet.Add(dataPoint);
 
