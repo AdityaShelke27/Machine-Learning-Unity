@@ -15,6 +15,7 @@ public class Neuron
     public Neuron(int nInputs)
     {
         numInputs = nInputs;
+        nWeights = numInputs;
 
         bias = Random.Range(-1f, 1f);
 

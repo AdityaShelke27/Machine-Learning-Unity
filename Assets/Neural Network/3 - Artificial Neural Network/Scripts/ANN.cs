@@ -36,12 +36,20 @@ public class ANN
         }
     }
 
-    public List<double> Go(List<double> inputValues, List<double> desiredOutput)
+    public List<double> Train(List<double> inputValues, List<double> desiredOutput)
+    {
+        List<double> output = Test(inputValues);
+        UpdateWeights(output, desiredOutput);
+
+        return output;
+    }
+
+    public List<double> Test(List<double> inputValues)
     {
         List<double> inputs = new List<double>();
         List<double> outputs = new List<double>();
 
-        if(inputValues.Count != numInputs)
+        if (inputValues.Count != numInputs)
         {
             Debug.Log("ERROR: Number of Inputs must be " + numInputs);
             return outputs;
@@ -49,15 +57,15 @@ public class ANN
 
         inputs = new List<double>(inputValues);
 
-        for(int i = 0; i < numHidden - 1; i++)
+        for (int i = 0; i < numHidden + 1; i++)
         {
-            if(i > 0)
+            if (i > 0)
             {
                 inputs = new List<double>(outputs);
             }
             outputs.Clear();
 
-            for(int j = 0; j < layers[i].numNeurons; j++)
+            for (int j = 0; j < layers[i].numNeurons; j++)
             {
                 double N = 0;
                 layers[i].neurons[j].inputs.Clear();
@@ -69,13 +77,104 @@ public class ANN
                 }
 
                 N -= layers[i].neurons[j].bias;
-                //layers[i].neurons[j].output = Activation(N);-----------------------------------------------------------
+                if(i == numHidden)
+                {
+                    layers[i].neurons[j].output = ActivationO(N);
+                }
+                else
+                {
+                    layers[i].neurons[j].output = Activation(N);
+                }
                 outputs.Add(layers[i].neurons[j].output);
             }
         }
 
-        //UpdateWeights(outputs, desiredOutput);------------------------------------------------------------------------
-
         return outputs;
+    }
+
+    void UpdateWeights(List<double> outputs, List<double> desiredOutputs)
+    {
+        double error;
+
+        for(int i = numHidden; i >= 0; i--)
+        {
+            for (int j = 0; j < layers[i].numNeurons; j++)
+            {
+                if(i == numHidden)
+                {
+                    
+                    error = desiredOutputs[j] - outputs[j];
+                    layers[i].neurons[j].errorGradient = outputs[j] * (1 - outputs[j]) * error;
+                }
+                else
+                {
+                    double sumError = 0;
+                    for (int k = 0; k < layers[i + 1].numNeurons; k++)
+                    {
+                        sumError += layers[i + 1].neurons[k].errorGradient * layers[i + 1].neurons[k].weights[j];
+                    }
+
+                    layers[i].neurons[j].errorGradient = layers[i].neurons[j].output * (1 - layers[i].neurons[j].output) * sumError;
+                }
+
+                for(int k = 0; k < layers[i].neurons[j].numInputs; k++)
+                {
+                    if(i == numHidden)
+                    {
+                        error = desiredOutputs[j] - outputs[j];
+                        layers[i].neurons[j].weights[k] += alpha * layers[i].neurons[j].inputs[k] * error;
+                    }
+                    else
+                    {
+                        layers[i].neurons[j].weights[k] += alpha * layers[i].neurons[j].inputs[k] * layers[i].neurons[j].errorGradient;
+                    }
+                }
+
+                layers[i].neurons[j].bias -= alpha * layers[i].neurons[j].errorGradient;
+            }
+        }
+    }
+
+    double Activation(double input)
+    {
+        return Tanh(input);
+    }
+    double ActivationO(double input)
+    {
+        return Sigmoid(input);
+    }
+    double Sigmoid(double input)
+    {
+        double expo = System.Math.Exp(input);
+        return expo / (1 + expo);   
+    }
+    double Step(double input)
+    {
+        if(input > 0)
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    double Tanh(double input)
+    {
+        double expo = System.Math.Exp(-2 * input);
+        return 2 / (1f + expo) - 1;
+    }
+
+    double ReLu(double input)
+    {
+        if(input > 0)
+        {
+            return input;
+        }
+        else
+        {
+            return 0.01 * input;
+        }
     }
 }
