@@ -4,12 +4,14 @@ using UnityEngine;
 public class ANNBrain : MonoBehaviour
 {
     ANN ann;
+    [SerializeField] Activation hiddenActivation;
+    [SerializeField] Activation outputActivation;
     double sumSquareError = 0;
     public int epochs;
     // Start is called before the first frame update
     void Start()
     {
-        ann = new ANN(2, 1, 1, 2, 0.8);
+        ann = new ANN(2, 1, 1, 2, 0.8, hiddenActivation, outputActivation);
 
         List<double> result;
         for (int i = 0; i < epochs; i++)

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Unity.Collections;
 using UnityEngine;
 
 public class Drive : MonoBehaviour
@@ -15,7 +16,7 @@ public class Drive : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        streamWriter = File.CreateText(Application.dataPath + "\\TrainingData.txt");
+        streamWriter = File.CreateText(Application.dataPath + "\\TrainingData.csv");
         Debug.Log(streamWriter);
     }
 

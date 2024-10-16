@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Neural Network/4 - Pong/Scenes/Pong.unity
+    guid: cef758dd161244f18b947b5be4507509
   m_configObjects: {}

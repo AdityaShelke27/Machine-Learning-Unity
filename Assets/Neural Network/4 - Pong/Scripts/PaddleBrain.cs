@@ -9,6 +9,8 @@ public class PaddleBrain : MonoBehaviour
     Rigidbody2D brb;
     public LayerMask backWall;
     [SerializeField] float yvel;
+    [SerializeField] Activation hiddenActivation;
+    [SerializeField] Activation outputActivation;
     float paddleMinY = 8.8f;
     float paddleMaxY = 17.4f;
     float paddleMaxSpeed = 50f;
@@ -19,7 +21,7 @@ public class PaddleBrain : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        ann = new ANN(6, 1, 1, 4, 0.01);
+        ann = new ANN(6, 1, 1, 4, 0.01, hiddenActivation, outputActivation);
         brb = ball.GetComponent<Rigidbody2D>();
     }
 

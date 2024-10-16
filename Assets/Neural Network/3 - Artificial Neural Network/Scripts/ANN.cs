@@ -2,16 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum Activation
+{
+    Sigmoid,
+    Step,
+    Tanh,
+    ReLu
+}
 public class ANN
 {
     public int numInputs;
     public int numOutputs;
     public int numHidden;
     public int numNPerHidden;
+    Activation hiddenActivation;
+    Activation outputActivation;
     public double alpha;
     public List<Layer> layers = new List<Layer>();
 
-    public ANN(int nI, int nO, int nH, int nPH, double a)
+    public ANN(int nI, int nO, int nH, int nPH, double a, Activation hiddenActivation, Activation outputActivation)
     {
         numInputs = nI;
         numOutputs = nO;
@@ -19,11 +28,11 @@ public class ANN
         numNPerHidden = nPH;
         alpha = a;
 
-        if(numHidden > 0)
+        if (numHidden > 0)
         {
             layers.Add(new Layer(numInputs, numNPerHidden));
 
-            for(int i = 0; i < numHidden - 1; i++)
+            for (int i = 0; i < numHidden - 1; i++)
             {
                 layers.Add(new Layer(numNPerHidden, numNPerHidden));
             }
@@ -34,6 +43,9 @@ public class ANN
         {
             layers.Add(new Layer(numInputs, numOutputs));
         }
+
+        this.hiddenActivation = hiddenActivation;
+        this.outputActivation = outputActivation;
     }
 
     public List<double> Train(List<double> inputValues, List<double> desiredOutput)
@@ -134,14 +146,72 @@ public class ANN
             }
         }
     }
-
+    public string PrintWeights()
+    {
+        string weightStr = "";
+        foreach (Layer l in layers)
+        {
+            foreach (Neuron n in l.neurons)
+            {
+                foreach (double w in n.weights)
+                {
+                    weightStr += w + ",";
+                }
+                weightStr += n.bias + ",";
+            }
+        }
+        return weightStr;
+    }
+    public void LoadWeights(string weightStr)
+    {
+        if (weightStr == "") return;
+        string[] weightValues = weightStr.Split(',');
+        int w = 0;
+        foreach (Layer l in layers)
+        {
+            foreach (Neuron n in l.neurons)
+            {
+                for (int i = 0; i < n.weights.Count; i++)
+                {
+                    n.weights[i] = System.Convert.ToDouble(weightValues[w]);
+                    w++;
+                }
+                n.bias = System.Convert.ToDouble(weightValues[w]);
+                w++;
+            }
+        }
+    }
     double Activation(double input)
     {
-        return Tanh(input);
+        switch(hiddenActivation)
+        {
+            case global::Activation.Sigmoid:
+                return Sigmoid(input);
+            case global::Activation.Tanh:
+                return Tanh(input);
+            case global::Activation.ReLu:
+                return ReLu(input);
+            case global::Activation.Step:
+                return Step(input);
+            default:
+                return Sigmoid(input);
+        }
     }
     double ActivationO(double input)
     {
-        return Sigmoid(input);
+        switch (hiddenActivation)
+        {
+            case global::Activation.Sigmoid:
+                return Sigmoid(input);
+            case global::Activation.Tanh:
+                return Tanh(input);
+            case global::Activation.ReLu:
+                return ReLu(input);
+            case global::Activation.Step:
+                return Step(input);
+            default:
+                return Sigmoid(input);
+        }
     }
     double Sigmoid(double input)
     {

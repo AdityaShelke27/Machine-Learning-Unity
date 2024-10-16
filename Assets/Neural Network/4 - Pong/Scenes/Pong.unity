@@ -1185,6 +1185,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   yvel: 0
+  hiddenActivation: 2
+  outputActivation: 2
   numSaved: 0
   numMissed: 0
 --- !u!4 &920456823
