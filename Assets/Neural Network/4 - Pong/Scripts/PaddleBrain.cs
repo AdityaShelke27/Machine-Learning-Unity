@@ -50,7 +50,6 @@ public class PaddleBrain : MonoBehaviour
                 output = Run(ball.transform.position, brb.velocity, paddle.transform.position, dy, true);
 
                 yvel = (float)output[0];
-
             }
         }
         else

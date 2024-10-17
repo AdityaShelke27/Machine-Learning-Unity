@@ -3,33 +3,34 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Replay
+public class BirdReplay
 {
     public List<double> states;
     public double reward;
 
-    public Replay(double xr, double ballz, double ballvz, double r)
+    public BirdReplay(double top, double bottom, double position, double r)
     {
         states = new List<double>
         {
-            xr,
-            ballz,
-            ballvz
+            top,
+            bottom,
+            position
         };
         reward = r;
     }
 }
-public class PlatformBrain : MonoBehaviour
+public class BirdBrain : MonoBehaviour
 {
-    public GameObject ball;
+    public GameObject bird;
     public Activation hiddenActivation;
     public Activation outputActivation;
+    public LayerMask wallLayer;
 
     ANN ann;
-    Rigidbody ballRB;
-    BallState bs;
+    Rigidbody2D birdRB;
+    BirdState bs;
     float reward = 0;
-    List<Replay> replayMemory = new();
+    List<BirdReplay> BirdReplayMemory = new();
     int mCapacity = 10000;
 
     float discount = 0.99f;
@@ -38,9 +39,9 @@ public class PlatformBrain : MonoBehaviour
     float minExploreRate = 0.01f;
     float exploreDecay = 0.0001f;
 
-    Vector3 ballStartpos;
+    Vector3 birdStartpos;
     int failCount = 0;
-    float tiltSpeed = 0.5f;
+    float jumpForce = 100f;
 
     float timer = 0;
     float maxBalanceTime = 0;
@@ -48,20 +49,20 @@ public class PlatformBrain : MonoBehaviour
     void Start()
     {
         ann = new ANN(3, 2, 1, 6, 0.2, hiddenActivation, outputActivation);
-        ballStartpos = ball.transform.position;
+        birdStartpos = bird.transform.position;
 
-        ballRB = ball.GetComponent<Rigidbody>();
-        bs = ball.GetComponent<BallState>();
+        birdRB = bird.GetComponent<Rigidbody2D>();
+        bs = bird.GetComponent<BirdState>();
 
         Time.timeScale = 5;
     }
 
     void Update()
     {
-        if(Input.GetKeyDown("space"))
+        if (Input.GetKeyDown("space"))
         {
-            ResetBall();
-        }    
+            ResetBird();
+        }
     }
     private void FixedUpdate()
     {
@@ -69,59 +70,62 @@ public class PlatformBrain : MonoBehaviour
         List<double> states = new();
         List<double> qs = new();
 
-        states.Add(transform.rotation.x);
-        states.Add(ball.transform.rotation.z);
-        states.Add(ballRB.angularVelocity.x);
+        RaycastHit hit;
+        Physics.Raycast(transform.position, transform.up, out hit, 1000, wallLayer);
+        states.Add(hit.distance);
+        Physics.Raycast(transform.position, -transform.up, out hit, 1000, wallLayer);
+        states.Add(hit.distance);
+        states.Add(transform.position.y);
 
         qs = SoftMax(ann.Test(states));
         double maxQ = qs.Max();
         int maxQIndex = qs.IndexOf(maxQ);
         exploreRate = Mathf.Clamp(exploreRate - exploreDecay, minExploreRate, maxExploreRate);
-
-        /*if(Random.Range(0, 100) < exploreRate)
+        /*
+        if(Random.Range(0, 100) < exploreRate)
             maxQIndex = Random.Range(0, 2);*/
 
         if (maxQIndex == 0)
-            transform.Rotate(Vector3.right, tiltSpeed * (float)qs[maxQIndex]);
+            birdRB.AddForce(transform.up * jumpForce * (float)qs[maxQIndex]);
         else
-            transform.Rotate(Vector3.right, -tiltSpeed * (float)qs[maxQIndex]);
+            birdRB.AddForce(transform.up * -jumpForce * (float)qs[maxQIndex]);
 
         if (bs.dropped)
             reward = -1;
         else
             reward = 0.1f;
 
-        Replay lastMemory = new(states[0], states[1], states[2], reward);
+        BirdReplay lastMemory = new(states[0], states[1], states[2], reward);
 
-        if(replayMemory.Count > mCapacity)
-            replayMemory.RemoveAt(0);
+        if (BirdReplayMemory.Count > mCapacity)
+            BirdReplayMemory.RemoveAt(0);
 
-        replayMemory.Add(lastMemory);
+        BirdReplayMemory.Add(lastMemory);
 
-        if(bs.dropped)
+        if (bs.dropped)
         {
-            for(int i = replayMemory.Count - 1; i >= 0; i--)
+            for (int i = BirdReplayMemory.Count - 1; i >= 0; i--)
             {
                 List<double> toutputsOld = new();
                 List<double> toutputsnew = new();
 
-                toutputsOld = SoftMax(ann.Test(replayMemory[i].states));
-                
+                toutputsOld = SoftMax(ann.Test(BirdReplayMemory[i].states));
+
                 double maxQOld = toutputsOld.Max();
                 int action = toutputsOld.IndexOf(maxQOld);
 
                 double feedback;
-                if(i == replayMemory.Count - 1 || replayMemory[i].reward == -1)
-                    feedback = replayMemory[i].reward;
+                if (i == BirdReplayMemory.Count - 1 || BirdReplayMemory[i].reward == -1)
+                    feedback = BirdReplayMemory[i].reward;
                 else
                 {
-                    toutputsnew = SoftMax(ann.Test(replayMemory[i + 1].states));
+                    toutputsnew = SoftMax(ann.Test(BirdReplayMemory[i + 1].states));
                     maxQ = toutputsnew.Max();
-                    feedback = replayMemory[i].reward + discount * maxQ;
+                    feedback = BirdReplayMemory[i].reward + discount * maxQ;
                 }
-                
+
                 toutputsOld[action] = feedback;
-                ann.Train(replayMemory[i].states, toutputsOld);
+                ann.Train(BirdReplayMemory[i].states, toutputsOld);
             }
 
             if (timer > maxBalanceTime)
@@ -131,19 +135,16 @@ public class PlatformBrain : MonoBehaviour
 
             timer = 0;
             bs.dropped = false;
-            transform.rotation = Quaternion.identity;
-            ResetBall();
-            replayMemory.Clear();
+            ResetBird();
+            BirdReplayMemory.Clear();
             failCount++;
 
         }
     }
 
-    private void ResetBall()
+    private void ResetBird()
     {
-        ball.transform.position = ballStartpos;
-        ballRB.velocity = Vector3.zero;
-        ballRB.angularVelocity = Vector3.zero;
+        bird.transform.position = birdStartpos;
     }
 
     List<double> SoftMax(List<double> values)
@@ -151,13 +152,13 @@ public class PlatformBrain : MonoBehaviour
         double max = values.Max();
         float scale = 0;
 
-        for(int i = 0; i < values.Count; ++i)
+        for (int i = 0; i < values.Count; ++i)
         {
-            scale += Mathf.Exp((float) (values[i] - max));
+            scale += Mathf.Exp((float)(values[i] - max));
         }
 
         List<double> result = new();
-        for(int i = 0; i < values.Count; ++i)
+        for (int i = 0; i < values.Count; ++i)
         {
             result.Add(Mathf.Exp((float)(values[i] - max)) / scale);
         }
