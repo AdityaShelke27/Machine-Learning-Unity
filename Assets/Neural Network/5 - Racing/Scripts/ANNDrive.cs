@@ -163,7 +163,7 @@ public class ANNDrive : MonoBehaviour
         }
     }
 
-    double Map(float newFrom, float newTo, float oldFrom, float oldTo, float value)
+    public static double Map(float newFrom, float newTo, float oldFrom, float oldTo, float value)
     {
         if (value <= oldFrom)
         {

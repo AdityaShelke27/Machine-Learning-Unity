@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+[System.Serializable]
 public class Replay
 {
     public List<double> states;
     public double reward;
 
-    public Replay(double xr, double ballz, double ballvz, double r)
+    public Replay(List<double> stateElements, double r)
     {
-        states = new List<double>
+        states = new List<double>();
+        for(int i = 0; i < stateElements.Count; i++)
         {
-            xr,
-            ballz,
-            ballvz
-        };
+            states.Add(stateElements[i]);
+        }
         reward = r;
     }
 }
@@ -91,7 +91,7 @@ public class PlatformBrain : MonoBehaviour
         else
             reward = 0.1f;
 
-        Replay lastMemory = new(states[0], states[1], states[2], reward);
+        Replay lastMemory = new(states, reward);
 
         if(replayMemory.Count > mCapacity)
             replayMemory.RemoveAt(0);
@@ -135,7 +135,6 @@ public class PlatformBrain : MonoBehaviour
             ResetBall();
             replayMemory.Clear();
             failCount++;
-
         }
     }
 
