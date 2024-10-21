@@ -15,6 +15,7 @@ TagManager:
   - backwall
   - Danger
   - Rod
+  - Blocker
   layers:
   - Default
   - TransparentFX
@@ -25,8 +26,8 @@ TagManager:
   - BOT
   - Wall
   - Backwall
-  - 
-  - 
+  - Blocker
+  - Car
   - 
   - 
   - 
