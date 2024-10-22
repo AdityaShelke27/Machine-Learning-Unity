@@ -147,7 +147,7 @@ public class ANN
         }
     }
 
-    public void CombineWeights(ANN parent1, ANN parent2)
+    public void CopyWeights(ANN parent1)
     {
         for(int i = 0; i < parent1.layers.Count; i++)
         {
@@ -155,14 +155,14 @@ public class ANN
             {
                 for (int k = 0; k < parent1.layers[i].neurons[j].weights.Count; k++)
                 {
-                    layers[i].neurons[j].weights[k] = (parent1.layers[i].neurons[j].weights[k] + parent2.layers[i].neurons[j].weights[k]) / 2;
+                    layers[i].neurons[j].weights[k] = parent1.layers[i].neurons[j].weights[k];
                 }
 
-                layers[i].neurons[j].bias = (parent1.layers[i].neurons[j].bias + parent2.layers[i].neurons[j].bias) / 2;
+                layers[i].neurons[j].bias = parent1.layers[i].neurons[j].bias;
             }
         }
     }
-    public void CombineWeights(ANN parent1, ANN parent2, float littleMutation)
+    public void CopyWeights(ANN parent1, float littleMutation)
     {
         for (int i = 0; i < parent1.layers.Count; i++)
         {
@@ -170,10 +170,10 @@ public class ANN
             {
                 for (int k = 0; k < parent1.layers[i].neurons[j].weights.Count; k++)
                 {
-                    layers[i].neurons[j].weights[k] = ((parent1.layers[i].neurons[j].weights[k] + parent2.layers[i].neurons[j].weights[k]) / 2) + Random.Range(-1f, 1f);
+                    layers[i].neurons[j].weights[k] = parent1.layers[i].neurons[j].weights[k] + Random.Range(-littleMutation, littleMutation);
                 }
 
-                layers[i].neurons[j].bias = ((parent1.layers[i].neurons[j].bias + parent2.layers[i].neurons[j].bias) / 2) + Random.Range(-littleMutation, littleMutation);
+                layers[i].neurons[j].bias = parent1.layers[i].neurons[j].bias + Random.Range(-littleMutation, littleMutation);
             }
         }
     }

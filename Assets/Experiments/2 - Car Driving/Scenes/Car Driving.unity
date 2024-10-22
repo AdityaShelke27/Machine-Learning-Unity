@@ -1046,7 +1046,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   carPrefab: {fileID: 6148303652955935649, guid: 1fdd48802f499c04890c462f6aaff851, type: 3}
   generation: 0
-  populationSize: 200
+  populationSize: 100
   population: []
   startPoint: {fileID: 2085932830}
   maxTime: 10

@@ -57,16 +57,17 @@ public class CarPopulationManager : MonoBehaviour
         {
             b.Combine(parent1.GetComponent<CarBrain>(), parent2.GetComponent<CarBrain>());
         }
-
         return offspring;
     }
 
     void BreedNewPopulation()
     {
-        List<GameObject> sortedList = population.OrderBy(o => o.GetComponent<CarBrain>().distanceTravelled + o.GetComponent<CarBrain>().timeAlive).ToList();
+        List<GameObject> sortedList = population.OrderByDescending(o => o.GetComponent<CarBrain>().distanceTravelled/* + o.GetComponent<CarBrain>().timeAlive*/).ToList();
         population.Clear();
-        for (int i = (sortedList.Count / 2) - 1; i < sortedList.Count - 1; i++)
+        for (int i = 0; i < (sortedList.Count / 4); i++)
         {
+            population.Add(Breed(sortedList[i], sortedList[i + 1]));
+            population.Add(Breed(sortedList[i + 1], sortedList[i]));
             population.Add(Breed(sortedList[i], sortedList[i + 1]));
             population.Add(Breed(sortedList[i + 1], sortedList[i]));
         }
