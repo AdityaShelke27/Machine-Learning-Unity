@@ -41,7 +41,7 @@ public class CarPopulationManager : MonoBehaviour
 
     void Update()
     {
-        if(alivePopulationCount <= 0 || elapsed <= 0)
+        if (alivePopulationCount <= 0 || elapsed <= 0)
         {
             BreedNewPopulation();
         }
@@ -62,7 +62,7 @@ public class CarPopulationManager : MonoBehaviour
 
     void BreedNewPopulation()
     {
-        List<GameObject> sortedList = population.OrderByDescending(o => o.GetComponent<CarBrain>().distanceTravelled/* + o.GetComponent<CarBrain>().timeAlive*/).ToList();
+        List<GameObject> sortedList = population.OrderByDescending(o => (o.GetComponent<CarBrain>().distanceTravelled / o.GetComponent<CarBrain>().timeAlive) + o.GetComponent<CarBrain>().distanceTravelled).ToList();
         population.Clear();
         for (int i = 0; i < (sortedList.Count / 4); i++)
         {

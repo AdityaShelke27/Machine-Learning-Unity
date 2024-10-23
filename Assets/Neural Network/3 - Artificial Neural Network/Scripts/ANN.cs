@@ -247,7 +247,12 @@ public class ANN
     double Sigmoid(double input)
     {
         double expo = System.Math.Exp(input);
-        return expo / (1 + expo);   
+        double result = expo / (1 + expo);
+        //if (result == double.NaN)
+        //{
+            Debug.Log(result + " " + expo + " " + input);
+        //}
+        return result;   
     }
     double Step(double input)
     {
